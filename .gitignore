@@ -1,0 +1,8 @@
+# terraform ignores
+*secrets.tfvars*
+.terraform*
+*.tfstate*
+
+# aws ignores
+*.pem
+*.pem*

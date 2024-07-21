@@ -1,0 +1,65 @@
+- hosts: all
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Update apt repository
+      apt_repository:
+        repo: 'ppa:git-core/ppa'
+        state: present
+      tags: git
+    
+    - name: Install required packages
+      apt:
+        name: ['postgresql-client-common', 'postgresql-client-14', 'python3-pip', 'gnupg', 'git', 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'awscli']
+        state: present
+        update_cache: yes
+      tags: packages
+
+    - name: Install docker-py
+      ansible.builtin.shell: "pip install docker"
+      tags: packages
+    
+    - name: Add Docker s GPG key for ubuntu from official site
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      tags:
+        - docker
+    
+    - name: Verify gpg key with the fingerprint
+      apt_key:
+        id: 0EBFCD88
+        state: present
+      tags:
+        - docker
+    
+    - name: Configure Docker for ubuntu stable repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+        update_cache: yes
+      tags:
+        - docker
+    
+    - name: Install docker-ce
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+      tags:
+        - docker
+    
+    - name: Add ubuntu user to docker group
+      user:
+        name: "ubuntu"
+        group: "docker"
+        append: yes
+      tags:
+        - docker
+    
+    - name: Install docker compose from apt
+      apt:
+        name: docker-compose-plugin
+        state: present
+        update_cache: yes
+      tags: compose
